@@ -12,7 +12,6 @@ import java.awt.event.MouseMotionAdapter;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import javax.xml.ws.Holder;
 
 public class Main {
     static enum Direction {
@@ -28,8 +27,8 @@ public class Main {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setTitle("Ray Casting Demo");
         frame.setSize(800, 600);
-        Holder<Point> mousePos = new Holder<>(new Point());
-        Holder<Point> playerPos = new Holder<>(new Point(frame.getWidth() / 2, frame.getHeight() / 2));
+        Point mousePos = new Point();
+        Point playerPos = new Point(frame.getWidth() / 2, frame.getHeight() / 2);
         int blockNum = 5;
         int blockWidth = 50;
         Font font = new Font("Verdana", Font.PLAIN, 16);
@@ -37,15 +36,18 @@ public class Main {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                int x1 = playerPos.value.x;
-                int x2 = mousePos.value.x;
-                int y1 = playerPos.value.y;
-                int y2 = mousePos.value.y;
+                int x1 = playerPos.x;
+                int x2 = mousePos.x;
+                int y1 = playerPos.y;
+                int y2 = mousePos.y;
                 Direction dir = Direction.NONE;
                 try {
                     //angle-finding code from http://wikicode.wikidot.com/get-angle-of-line-between-two-points
                     int angle = (int) Math.toDegrees(Math.atan2(y2 - y1, x2 - x1));
-                    if (inRange(angle, -60, 60)) {
+                    if (playerPos.equals(mousePos)) {
+                        dir = Direction.NONE;
+                    }
+                    else if (inRange(angle, -60, 60)) {
                         dir = Direction.RIGHT;
                     }
                     else if (inRange(angle, 60, 150)) {
@@ -69,7 +71,7 @@ public class Main {
                     g2D.setColor(Color.RED);
                 }
                 g2D.setFont(font);
-                g2D.drawLine(playerPos.value.x, playerPos.value.y, mousePos.value.x, mousePos.value.y);
+                g2D.drawLine(playerPos.x, playerPos.y, mousePos.x, mousePos.y);
                 if (g2D.getColor() != Color.RED) {
                     g2D.setColor(Color.RED);
                 }
@@ -81,13 +83,8 @@ public class Main {
         panel.setSize(frame.getSize());
         frame.addMouseMotionListener(new MouseMotionAdapter() {
             @Override
-            public void mouseDragged(MouseEvent e) {
-                
-            }
-
-            @Override
             public void mouseMoved(MouseEvent e) {
-                mousePos.value.setLocation(e.getX(), e.getY());
+                mousePos.setLocation(e.getX(), e.getY());
                 panel.repaint();
             }
         });
@@ -100,21 +97,21 @@ public class Main {
                         System.exit(0);
                         break;
                     case KeyEvent.VK_RIGHT:
-                        playerPos.value.x += 1;
+                        playerPos.x += 1;
                         break;
                     case KeyEvent.VK_LEFT:
-                        playerPos.value.x -= 1;
+                        playerPos.x -= 1;
                         break;
                     case KeyEvent.VK_UP:
-                        playerPos.value.y -= 1;
+                        playerPos.y -= 1;
                         break;
                     case KeyEvent.VK_DOWN:
-                        playerPos.value.y += 1;
+                        playerPos.y += 1;
                         break;
                     default:
                         break;
                 }
-                playerPos.value.setLocation(clamp(playerPos.value.x, 0, panel.getWidth()), clamp(playerPos.value.y, 0, panel.getHeight()));
+                playerPos.setLocation(clamp(playerPos.x, 0, panel.getWidth()), clamp(playerPos.y, 0, panel.getHeight()));
                 panel.repaint();
             }
         });
